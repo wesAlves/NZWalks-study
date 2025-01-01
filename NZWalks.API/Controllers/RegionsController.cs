@@ -65,6 +65,29 @@ public class RegionsController : ControllerBase
         return Ok(regionDto);
     }
 
-    // [HttpPost]
-    // public async Task<IActionResult> AddRegion
+    [HttpPost]
+    public IActionResult CreateRegion([FromBody] CreateRegionDto createRegionDto)
+    {
+        var regionDomain = new Region()
+        {
+            Code = createRegionDto.Code,
+            Name = createRegionDto.Name,
+            ImageUrl = createRegionDto.ImageUrl
+        };
+
+        _dbContext.Regions.Add(regionDomain);
+        _dbContext.SaveChanges();
+        
+        //Map the Domain model back to the DTO
+        var regionDto = new RegionDTO
+        {
+            Id = regionDomain.Id,
+            Code = regionDomain.Code,
+            Name = regionDomain.Name,
+            ImageUrl = regionDomain.ImageUrl
+        };
+
+        //Here we should return 201 to acheive that we whant to pass the location from the resource
+        return CreatedAtAction(nameof(GetById), new { id = regionDto.Id }, regionDto);
+    }
 }
