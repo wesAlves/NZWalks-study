@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NZWalks.API.Data;
 using NZWalks.API.Models.Domain;
 using NZWalks.API.Models.DTO;
@@ -18,10 +19,10 @@ public class RegionsController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult GetAll()
+    public async Task<IActionResult> GetAll()
     {
         //Get data from Database - Domain models;
-        var regionsDomain = _dbContext.Regions.ToList();
+        var regionsDomain = await _dbContext.Regions.ToListAsync();
 
         //Map Domain models to DTOs;
         var regionsDto = new List<RegionDTO>();
@@ -42,12 +43,12 @@ public class RegionsController : ControllerBase
 
     [HttpGet]
     [Route("{id:guid}")]
-    public IActionResult GetById([FromRoute] Guid id)
+    public async Task<IActionResult> GetById([FromRoute] Guid id)
     {
         //Only could be used with primary key
         // var region = _dbContext.Regions.Find(id);
 
-        var regionDomain = _dbContext.Regions.FirstOrDefault(x => x.Id == id);
+        var regionDomain = await _dbContext.Regions.FirstOrDefaultAsync(x => x.Id == id);
 
         if (regionDomain is null)
         {
@@ -66,7 +67,7 @@ public class RegionsController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult CreateRegion([FromBody] CreateRegionDto createRegionDto)
+    public async Task<IActionResult> CreateRegion([FromBody] CreateRegionDto createRegionDto)
     {
         var regionDomain = new Region()
         {
@@ -76,7 +77,7 @@ public class RegionsController : ControllerBase
         };
 
         _dbContext.Regions.Add(regionDomain);
-        _dbContext.SaveChanges();
+        await _dbContext.SaveChangesAsync();
 
         //Map the Domain model back to the DTO
         var regionDto = new RegionDTO
@@ -93,7 +94,7 @@ public class RegionsController : ControllerBase
 
     [HttpPut]
     [Route("{id:guid}")]
-    public IActionResult UpdateRegion([FromRoute] Guid id, [FromBody] UpdateRegionDto updateRegionDto)
+    public async Task<IActionResult> UpdateRegion([FromRoute] Guid id, [FromBody] UpdateRegionDto updateRegionDto)
     {
         var regionDomainModel = _dbContext.Regions.FirstOrDefault(x => x.Id == id);
 
@@ -105,7 +106,7 @@ public class RegionsController : ControllerBase
         regionDomainModel.Name = updateRegionDto.Name;
         regionDomainModel.ImageUrl = updateRegionDto.ImageUrl;
 
-        _dbContext.SaveChanges();
+        await _dbContext.SaveChangesAsync();
 
         //Convert Domain model to DTO
         var regionDto = new RegionDTO
@@ -122,7 +123,7 @@ public class RegionsController : ControllerBase
 
     [HttpDelete]
     [Route("{id:guid}")]
-    public IActionResult DeleteRegion([FromRoute] Guid id)
+    public async Task<IActionResult> DeleteRegion([FromRoute] Guid id)
     {
         var regionDomainModel = _dbContext.Regions.FirstOrDefault(x => x.Id == id);
 
@@ -130,7 +131,7 @@ public class RegionsController : ControllerBase
             return NotFound();
 
         _dbContext.Regions.Remove(regionDomainModel);
-        _dbContext.SaveChanges();
+        await _dbContext.SaveChangesAsync();
 
 
         //Convert Domain model to DTO
