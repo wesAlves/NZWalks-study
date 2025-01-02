@@ -16,6 +16,7 @@ builder.Services.AddDbContext<NZWalksDbContext>(options =>
 
 
 builder.Services.AddScoped<IRegionRepository, PSQLRgionRepository>();
+builder.Services.AddScoped<IWalkRepository, PSQLWalkRepository>();
 
 var app = builder.Build();
 
