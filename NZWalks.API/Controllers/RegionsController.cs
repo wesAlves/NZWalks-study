@@ -51,7 +51,7 @@ public class RegionsController : ControllerBase
         //Only could be used with primary key
         // var region = _dbContext.Regions.Find(id);
 
-        var regionDomain = await _dbContext.Regions.FirstOrDefaultAsync(x => x.Id == id);
+        var regionDomain = await _regionRepository.GetByIdAsync(id);
 
         if (regionDomain is null)
         {
@@ -79,8 +79,7 @@ public class RegionsController : ControllerBase
             ImageUrl = createRegionDto.ImageUrl
         };
 
-        _dbContext.Regions.Add(regionDomain);
-        await _dbContext.SaveChangesAsync();
+        await _regionRepository.CreateRegionAsync(regionDomain);
 
         //Map the Domain model back to the DTO
         var regionDto = new RegionDTO
@@ -99,17 +98,14 @@ public class RegionsController : ControllerBase
     [Route("{id:guid}")]
     public async Task<IActionResult> UpdateRegion([FromRoute] Guid id, [FromBody] UpdateRegionDto updateRegionDto)
     {
-        var regionDomainModel = _dbContext.Regions.FirstOrDefault(x => x.Id == id);
+        var regionDomainModel = new Region
+        {
+            Code = updateRegionDto.Code,
+            Name = updateRegionDto.Name,
+            ImageUrl = updateRegionDto.ImageUrl
+        };
 
-        if (regionDomainModel == null)
-            return NotFound();
-
-        //Map DTO to Domain model
-        regionDomainModel.Code = updateRegionDto.Code;
-        regionDomainModel.Name = updateRegionDto.Name;
-        regionDomainModel.ImageUrl = updateRegionDto.ImageUrl;
-
-        await _dbContext.SaveChangesAsync();
+        await _regionRepository.UpdateRegionAsync(id, regionDomainModel);
 
         //Convert Domain model to DTO
         var regionDto = new RegionDTO
@@ -128,14 +124,11 @@ public class RegionsController : ControllerBase
     [Route("{id:guid}")]
     public async Task<IActionResult> DeleteRegion([FromRoute] Guid id)
     {
-        var regionDomainModel = _dbContext.Regions.FirstOrDefault(x => x.Id == id);
 
-        if (regionDomainModel == null)
+        var regionDomainModel = await _regionRepository.DeleteRegionAsync(id);
+
+        if (regionDomainModel is null)
             return NotFound();
-
-        _dbContext.Regions.Remove(regionDomainModel);
-        await _dbContext.SaveChangesAsync();
-
 
         //Convert Domain model to DTO
         var regionDto = new RegionDTO
@@ -145,6 +138,7 @@ public class RegionsController : ControllerBase
             Name = regionDomainModel.Name,
             ImageUrl = regionDomainModel.ImageUrl
         };
+        
         return Ok(regionDto);
     }
 }
