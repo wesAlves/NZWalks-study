@@ -45,4 +45,58 @@ public class WalksController : ControllerBase
 
         return Ok(walkDto);
     }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAllWalks()
+    {
+        var walks = await _repository.GetAllAsync();
+
+        var walksDTO = new List<Walk>();
+
+        foreach (var walk in walks)
+        {
+            walksDTO.Add(walk);
+        }
+
+
+        return Ok(walksDTO);
+    }
+
+    [HttpGet]
+    [Route("{id:guid}")]
+    public async Task<IActionResult> GetById([FromRoute] Guid id)
+    {
+        var walkDomain = _repository.GetByIdAsync(id);
+
+        if (walkDomain is null)
+            return NotFound();
+
+        //TODO: MAP TO A DTO
+        return Ok(walkDomain);
+    }
+
+    [HttpPut]
+    [Route("{id:guid}")]
+    public async Task<IActionResult> UpdateWalk([FromRoute] Guid id, [FromBody] WalkDTO walkDto)
+    {
+        var walkDomain = _repository.UpdateAsync(id, new Walk()
+        {
+            Name = walkDto.Name,
+            Description = walkDto.Description,
+            LengthInKm = walkDto.LengthInKm
+        });
+
+        //TODO: MAP TO A DTO
+        return Ok(walkDomain);
+    }
+
+    [HttpDelete]
+    [Route("{id:guid}")]
+    public async Task<IActionResult> DeleteWalk([FromRoute] Guid id)
+    {
+        var walkDomain = _repository.DeleteAsync(id);
+
+        //TODO: MAP TO A DTO
+        return Ok(walkDomain);
+    }
 }
